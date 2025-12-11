@@ -29,5 +29,5 @@ jobs:
       - name: Run tests
         run: cd frontend && flutter test
 
-      - name: Build Web (nếu deploy Web)
+      - name: Build Web
         run: cd frontend && flutter build web
