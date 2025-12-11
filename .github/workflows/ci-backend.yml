@@ -1,0 +1,28 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        run: cd backend && dart pub get
+
+      - name: Run tests
+        run: cd backend && dart test
+
+      - name: Build backend (optional)
+        run: cd backend && dart compile exe bin/server.dart -o server

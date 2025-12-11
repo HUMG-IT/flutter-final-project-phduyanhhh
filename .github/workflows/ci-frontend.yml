@@ -1,0 +1,33 @@
+name: Frontend CI
+
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.22.0"
+
+      - name: Install dependencies
+        run: cd frontend && flutter pub get
+
+      - name: Run analyzer
+        run: cd frontend && flutter analyze
+
+      - name: Run tests
+        run: cd frontend && flutter test
+
+      - name: Build Web (nếu deploy Web)
+        run: cd frontend && flutter build web
