@@ -1,7 +1,6 @@
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../datasources/user_datasource.dart';
-import '../models/user_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserDataSource ds;
@@ -9,11 +8,12 @@ class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl(this.ds);
 
   @override
-  Future<List<User>> getUsers() async {
-    final data = await ds.getUsers();
-    return data.map((e) => UserModel.fromMap(e)).toList();
+  Future<User> register(String username, String email, String password) {
+    return ds.createUser(username, email, password);
   }
 
   @override
-  Future<void> createUser(String name) => ds.createUser(name);
+  Future<User?> login(String username, String password) {
+    return ds.findUserForLogin(username, password);
+  }
 }

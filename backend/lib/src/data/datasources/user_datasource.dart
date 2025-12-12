@@ -1,20 +1,50 @@
 import 'package:postgres/postgres.dart';
+import '../../domain/entities/user.dart';
 
 class UserDataSource {
-  final PostgreSQLConnection conn;
+  final PostgreSQLConnection db;
 
-  UserDataSource(this.conn);
+  UserDataSource(this.db);
 
-  Future<List<Map<String, dynamic>>> getUsers() async {
-    final results = await conn.mappedResultsQuery('SELECT * FROM users');
+  Future<User> createUser(
+    String username,
+    String email,
+    String password,
+  ) async {
+    final result = await db.query(
+      '''
+      INSERT INTO users (username, email, password)
+      VALUES (@username, @email, @password)
+      RETURNING id, username, email
+      ''',
+      substitutionValues: {
+        'username': username,
+        'email': email,
+        'password': password,
+      },
+    );
 
-    return results.map((row) => row['users']!).toList();
+    final row = result.first.toColumnMap();
+
+    return User(id: row['id'], username: row['username'], email: row['email']);
   }
 
-  Future<void> createUser(String name) async {
-    await conn.query(
-      'INSERT INTO users (name) VALUES (@name)',
-      substitutionValues: {'name': name},
+  Future<User?> findUserForLogin(String username, String password) async {
+    final result = await db.query(
+      '''
+      SELECT id, username, email, password
+      FROM users
+      WHERE username = @username
+      ''',
+      substitutionValues: {'username': username},
     );
+
+    if (result.isEmpty) return null;
+
+    final row = result.first.toColumnMap();
+
+    if (row['password'] != password) return null;
+
+    return User(id: row['id'], username: row['username'], email: row['email']);
   }
 }

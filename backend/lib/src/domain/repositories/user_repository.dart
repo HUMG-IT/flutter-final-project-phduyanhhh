@@ -1,6 +1,7 @@
 import '../entities/user.dart';
 
 abstract class UserRepository {
-  Future<List<User>> getUsers();
-  Future<void> createUser(String name);
+  Future<User> register(String username, String email, String password);
+
+  Future<User?> login(String username, String password);
 }

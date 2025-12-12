@@ -1,37 +1,52 @@
 import 'dart:convert';
-import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+
 import '../domain/repositories/user_repository.dart';
+import 'package:shelf/shelf.dart';
 
 class UserController {
   final UserRepository repository;
 
-  UserController(this.repository);
-
   Router get router {
     final router = Router();
 
-    router.get('/users', _getUsers);
-    router.post('/users', _createUser);
+    router.post('/register', register);
+    router.post('/login', login);
 
     return router;
   }
 
-  Future<Response> _getUsers(Request req) async {
-    final users = await repository.getUsers();
+  UserController(this.repository);
 
-    final data = users.map((u) => u.toJson()).toList();
+  // POST /register
+  Future<Response> register(Request req) async {
+    final body = jsonDecode(await req.readAsString());
+
+    final user = await repository.register(
+      body['username'],
+      body['email'],
+      body['password'],
+    );
 
     return Response.ok(
-      jsonEncode(data),
+      jsonEncode(user.toJson()),
       headers: {'Content-Type': 'application/json'},
     );
   }
 
-  Future<Response> _createUser(Request req) async {
-    final body = await req.readAsString();
-    final data = jsonDecode(body);
-    await repository.createUser(data['name']);
-    return Response.ok('User created');
+  // POST /login
+  Future<Response> login(Request req) async {
+    final body = jsonDecode(await req.readAsString());
+
+    final user = await repository.login(body['username'], body['password']);
+
+    if (user == null) {
+      return Response.forbidden(jsonEncode({"message": "Invalid login"}));
+    }
+
+    return Response.ok(
+      jsonEncode(user.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
   }
 }
