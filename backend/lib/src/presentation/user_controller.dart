@@ -18,7 +18,6 @@ class UserController {
 
   UserController(this.repository);
 
-  // POST /register
   Future<Response> register(Request req) async {
     final body = jsonDecode(await req.readAsString());
 
@@ -34,7 +33,6 @@ class UserController {
     );
   }
 
-  // POST /login
   Future<Response> login(Request req) async {
     final body = jsonDecode(await req.readAsString());
 
